@@ -5,19 +5,47 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+export type CreateInvoiceErrorState = {
+  error?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number().transform((value) => value * 100),
-  status: z.enum(['pending', 'paid']),
+  customerId: z.string({
+    invalid_type_error: 'Please select a customer',
+  }),
+  amount: z.coerce
+    .number()
+    .gt(0, { message: 'Please enter an amount greater than $0.' })
+    .transform((value) => value * 100),
+  status: z.enum(['pending', 'paid'], {
+    invalid_type_error: 'Please select an invoice status',
+  }),
   date: z.string(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(formData: FormData) {
+export async function createInvoice(
+  prevState: CreateInvoiceErrorState,
+  formData: FormData,
+) {
   const rawFormData = Object.fromEntries(formData.entries());
-  const { customerId, amount, status } = CreateInvoice.parse(rawFormData);
+  const validatedFields = CreateInvoice.safeParse(rawFormData);
+
+  if (!validatedFields.success) {
+    return {
+      error: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
 
   const [date] = new Date().toISOString().split('T');
 
