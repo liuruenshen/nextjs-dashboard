@@ -1,10 +1,18 @@
 import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchCustomers, fetchInvoiceById } from '@/app/lib/data';
+import {
+  fetchCustomers,
+  fetchInvoiceById,
+  getAllInvoiceIds,
+} from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 
 interface EditProps {
   params: { id: string };
+}
+
+export async function generateStaticParams() {
+  return await getAllInvoiceIds();
 }
 
 export default async function Page({ params: { id } }: EditProps) {

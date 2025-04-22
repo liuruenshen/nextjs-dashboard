@@ -153,6 +153,22 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
+export async function getAllInvoiceIds(): Promise<string[]> {
+  unstable_noStore();
+
+  try {
+    const data = await sql<{ id: string }>`
+      SELECT id FROM invoices
+    `;
+    console.log('🚀 ~ getAllInvoiceIds ~ data:', data);
+
+    return data.rows.map((invoice) => invoice.id);
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch all invoice IDs.');
+  }
+}
+
 export async function fetchInvoiceById(id: string) {
   unstable_noStore();
 
