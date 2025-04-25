@@ -10,7 +10,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/app/ui/button';
 import { CreateInvoiceErrorState, createInvoice } from '@/app/lib/actions';
-import { useFormState } from 'react-dom';
+import { useActionState, useEffect, useRef } from 'react';
+import { useRouteBack } from '@/app/lib/hooks';
+import { ServerRedirectableLink } from '../ServerRedirectableLink';
 
 function useGetCreateInvoiceError(
   state: CreateInvoiceErrorState,
@@ -33,13 +35,26 @@ function useGetCreateInvoiceError(
   return [htmlId, jsx] as const;
 }
 
-export default function Form({ customers }: { customers: CustomerField[] }) {
-  const initialState = { message: null, errors: {} };
+export interface FormProps {
+  customers: CustomerField[];
+  requestServerRedirect: boolean;
+}
+
+const initialState = { message: null, errors: {} };
+
+export default function Form({ customers, requestServerRedirect }: FormProps) {
+  const createInvoiceWithRedirect = createInvoice.bind(
+    null,
+    requestServerRedirect,
+  );
+
   /**
    * https://stackoverflow.com/questions/77828579/useformstate-vs-useform-in-nextjs-v14
    */
-  const [state, dispatch] = useFormState(createInvoice, initialState);
-
+  const [state, dispatch, isPending] = useActionState(
+    createInvoiceWithRedirect,
+    initialState,
+  );
   const [customerErrorHintId, customerErrorElement] = useGetCreateInvoiceError(
     state,
     'customerId',
@@ -54,6 +69,8 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
     state,
     'status',
   );
+
+  const { route } = useRouteBack({ isPending, requestServerRedirect });
 
   return (
     <form action={dispatch}>
@@ -156,12 +173,13 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         </fieldset>
       </div>
       <div className="mt-6 flex justify-end gap-4">
-        <Link
+        <ServerRedirectableLink
           href="/dashboard/invoices"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          requestServerRedirect={requestServerRedirect}
         >
           Cancel
-        </Link>
+        </ServerRedirectableLink>
         <Button type="submit">Create Invoice</Button>
       </div>
     </form>

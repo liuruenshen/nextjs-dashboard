@@ -216,3 +216,9 @@ export function InvoicesTableSkeleton() {
     </div>
   );
 }
+
+export function PaginationSkeleton() {
+  return (
+    <div className={`${shimmer} h-10 w-60 rounded-lg bg-gray-100 p-5`}></div>
+  );
+}

@@ -1,15 +1,16 @@
-import { getAllInvoiceIds } from '@/app/lib/data';
 import EditMain from '@/app/ui/invoices/edit-main';
+import { Modal } from '@/app/ui/modal';
 
 interface EditProps {
   params: Promise<{ id: string }>;
 }
 
-/* export async function generateStaticParams() {
-  return await getAllInvoiceIds();
-} */
-
 export default async function Page({ params }: EditProps) {
   const { id } = await params;
-  return <EditMain id={id} requestServerRedirect={true} />;
+
+  return (
+    <Modal>
+      <EditMain id={id} requestServerRedirect={false} />
+    </Modal>
+  );
 }

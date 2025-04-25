@@ -3,9 +3,13 @@
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+
+export interface GeneralErrorState {
+  message: string;
+}
 
 export type CreateInvoiceErrorState = {
   error?: {
@@ -34,9 +38,10 @@ const FormSchema = z.object({
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
 export async function createInvoice(
+  needRedirect: boolean,
   _prevState: CreateInvoiceErrorState,
   formData: FormData,
-) {
+): Promise<CreateInvoiceErrorState> {
   const rawFormData = Object.fromEntries(formData.entries());
   const validatedFields = CreateInvoice.safeParse(rawFormData);
 
@@ -62,12 +67,25 @@ export async function createInvoice(
   }
 
   revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+
+  if (needRedirect) {
+    redirect('/dashboard/invoices');
+  }
+
+  return {
+    message: 'Created Invoice.',
+    error: [] as CreateInvoiceErrorState['error'],
+  };
 }
 
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function updateInvoice(id: string, formData: FormData) {
+export async function updateInvoice(
+  needRedirect: boolean,
+  id: string,
+  _prevState: GeneralErrorState,
+  formData: FormData,
+): Promise<{ message: string }> {
   const { customerId, amount, status } = UpdateInvoice.parse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
@@ -85,7 +103,11 @@ export async function updateInvoice(id: string, formData: FormData) {
   }
 
   revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  if (needRedirect) {
+    redirect('/dashboard/invoices');
+  }
+
+  return { message: 'Updated Invoice.' };
 }
 
 export async function deleteInvoice(id: string) {

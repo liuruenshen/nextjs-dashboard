@@ -17,10 +17,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  console.log('🚀 app/layout ~ children:');
+  // console.log('🚀 app/layout ~ children:');
   return (
     <html lang="en" className={`${inter.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <div id="modal-root" />
+      </body>
     </html>
   );
 }

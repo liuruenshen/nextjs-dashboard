@@ -1,11 +1,11 @@
 import { Client } from '../ui/client';
 
 export default function Template({ children }: { children: any }) {
-  console.log('🚀 ~ Template ~ Template: /dashboard:template');
+  // console.log('🚀 ~ Template ~ Template: /dashboard:template');
   return (
-    <div id="dashboard-template">
+    <div data-id="dashboard-template" className="h-full w-full">
       {children}
-      <Client />
+      <Client source="Dashboard Template" />
     </div>
   );
 }

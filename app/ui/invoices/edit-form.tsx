@@ -10,18 +10,41 @@ import {
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateInvoice } from '@/app/lib/actions';
+import { useRouter } from 'next/navigation';
+import { useActionState } from 'react';
+import { useRouteBack } from '@/app/lib/hooks';
+import { ServerRedirectableLink } from '../ServerRedirectableLink';
+
+interface EditInvoiceFormProps {
+  invoice: InvoiceForm;
+  customers: CustomerField[];
+  requestServerRedirect: boolean;
+}
+
+const INITIAL_STATE = { message: '' };
 
 export default function EditInvoiceForm({
   invoice,
   customers,
-}: {
-  invoice: InvoiceForm;
-  customers: CustomerField[];
-}) {
-  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+  requestServerRedirect,
+}: EditInvoiceFormProps) {
+  const route = useRouter();
+
+  const updateInvoiceWithId = updateInvoice.bind(
+    null,
+    requestServerRedirect,
+    invoice.id,
+  );
+
+  const [_state, dispatch, isPending] = useActionState(
+    updateInvoiceWithId,
+    INITIAL_STATE,
+  );
+
+  useRouteBack({ isPending, requestServerRedirect });
 
   return (
-    <form action={updateInvoiceWithId}>
+    <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -113,12 +136,13 @@ export default function EditInvoiceForm({
         </fieldset>
       </div>
       <div className="mt-6 flex justify-end gap-4">
-        <Link
+        <ServerRedirectableLink
           href="/dashboard/invoices"
+          requestServerRedirect={requestServerRedirect}
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
           Cancel
-        </Link>
+        </ServerRedirectableLink>
         <Button type="submit">Edit Invoice</Button>
       </div>
     </form>

@@ -1,17 +1,34 @@
 import SideNav from '@/app/ui/dashboard/sidenav';
 import { Client } from '../ui/client';
+import React from 'react';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  console.log('🚀dashboard/layout ~ Layout');
+export default function Layout({
+  children,
+  footer,
+  invoiceEdit,
+}: {
+  children: React.ReactNode;
+  footer: React.ReactNode;
+  invoiceEdit: React.ReactNode;
+}) {
+  // console.log('🚀 ~ invoiceEdit:', invoiceEdit);
   return (
-    <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
+    <div
+      id="DashboardLayout"
+      className="flex h-screen flex-col md:flex-row md:overflow-hidden"
+    >
       <div className="w-full flex-none md:w-64">
         <SideNav />
       </div>
-      <div data-id="page" className="flex-grow p-6 md:overflow-y-auto md:p-12">
+      <div
+        id="DashboardChildContainer"
+        className="grid flex-grow grid-rows-[repeat(2,1fr)] p-6 md:overflow-y-auto md:p-12"
+      >
         {children}
+        {footer}
+        {invoiceEdit}
       </div>
-      <Client />
+      <Client source="Dashboard Layout" />
     </div>
   );
 }
