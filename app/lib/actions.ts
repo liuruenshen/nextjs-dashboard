@@ -45,6 +45,11 @@ export async function createInvoice(
   const rawFormData = Object.fromEntries(formData.entries());
   const validatedFields = CreateInvoice.safeParse(rawFormData);
 
+  /**
+   * Uncomment this line to test the error handling
+   */
+  // throw new Error('Invalid form data');
+
   if (!validatedFields.success) {
     return {
       error: validatedFields.error.flatten().fieldErrors,
@@ -86,6 +91,11 @@ export async function updateInvoice(
   _prevState: GeneralErrorState,
   formData: FormData,
 ): Promise<{ message: string }> {
+  /**
+   * Uncomment this line to test the error handling
+   */
+  // throw new Error('Invalid form data during updating the invoice');
+
   const { customerId, amount, status } = UpdateInvoice.parse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),

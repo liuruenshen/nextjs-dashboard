@@ -69,7 +69,7 @@ export default function Form({ customers, requestServerRedirect }: FormProps) {
     'status',
   );
 
-  const { route } = useRouteBack({ isPending, requestServerRedirect });
+  useRouteBack({ isPending, requestServerRedirect });
 
   return (
     <form action={dispatch}>

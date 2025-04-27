@@ -176,6 +176,11 @@ export async function getAllInvoiceIds(): Promise<string[]> {
 export async function fetchInvoiceById(id: string) {
   unstable_noStore();
 
+  /**
+   * Uncomment this line to test the 404 not-found error handling
+   */
+  //return undefined;
+
   try {
     const data = await sql<InvoiceForm>`
       SELECT
