@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import { Input } from './input';
 
 export default function Search({ placeholder }: { placeholder: string }) {
   const searchParams = useSearchParams();
@@ -37,8 +38,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
         Search
       </label>
       <div className="flex w-full items-center rounded-md border border-gray-200 px-3">
-        <input
-          className="peer block grow border-none py-[9px] pl-10 text-sm placeholder:text-gray-500 focus:[box-shadow:none]"
+        <Input
           placeholder={placeholder}
           onChange={(e) => {
             setQuery(e.target.value);
