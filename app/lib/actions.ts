@@ -147,3 +147,7 @@ export async function authenticate(
     throw error;
   }
 }
+
+export async function authenticateViaGitHub() {
+  await signIn('github');
+}

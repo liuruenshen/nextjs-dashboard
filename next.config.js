@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {},
+  images: {
+    remotePatterns: [new URL('https://github.githubassets.com/assets/**')],
+  },
   headers() {
     return [
       {

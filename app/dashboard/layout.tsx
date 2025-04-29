@@ -11,7 +11,6 @@ export default function Layout({
   footer: React.ReactNode;
   invoiceEdit: React.ReactNode;
 }) {
-  // console.log('🚀 ~ invoiceEdit:', invoiceEdit);
   return (
     <div
       id="DashboardLayout"
