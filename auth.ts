@@ -22,7 +22,7 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
-export const { signIn, signOut } = NextAuth({
+export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     ...authConfig.providers,

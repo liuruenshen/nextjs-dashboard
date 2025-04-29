@@ -2,7 +2,15 @@
 const nextConfig = {
   experimental: {},
   images: {
-    remotePatterns: [new URL('https://github.githubassets.com/assets/**')],
+    remotePatterns: [
+      new URL('https://github.githubassets.com/assets/**'),
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
   headers() {
     return [
