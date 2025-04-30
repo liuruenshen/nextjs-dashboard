@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from 'next-auth';
 import GitHub from 'next-auth/providers/github';
+import { NextResponse } from 'next/server';
 
 /**
  * This file can't import any NODE API because it is used in the middleware, which is
@@ -14,19 +15,25 @@ export const authConfig = {
     error: '/login/error',
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log(user, account, profile);
-      return true;
-    },
+    /**
+     * Returning false won't work(Unauthenticated users see the protected resources) after upgrading Nextjs from v14 to v15. Even though I
+     * followed the documentation from the following sources:
+     * 1. https://nextjs.org/learn/dashboard-app/adding-authentication
+     * 2. https://authjs.dev/getting-started/session-management/protecting
+     *
+     * The workaround is to use `redirect` to prevent unauthenticated users from accessing the protected resources.
+     */
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        return NextResponse.redirect(new URL('/login', nextUrl));
       } else if (isLoggedIn) {
-        return Response.redirect(new URL('/dashboard', nextUrl));
+        return NextResponse.redirect(new URL('/dashboard', nextUrl));
       }
+
       return true;
     },
   },
