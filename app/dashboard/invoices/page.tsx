@@ -7,6 +7,7 @@ import { InvoicesTableSkeleton, PaginationSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchInvoicesPages } from '@/app/lib/data';
 import { Metadata } from 'next';
+import { isAuthenticated } from '@/app/ui/isAuthenticated';
 
 export const metadata: Metadata = {
   title: 'Invoices',
@@ -29,6 +30,12 @@ async function PaginationWrapper({ query }: PaginationWrapperProps) {
 }
 
 export default async function Page({ searchParams }: InvoicesPageProps) {
+  const loginFirst = await isAuthenticated();
+
+  if (loginFirst) {
+    return loginFirst;
+  }
+
   const params = await searchParams;
   const query = params?.query || '';
   const currentPage = Number(params?.page ?? 1);

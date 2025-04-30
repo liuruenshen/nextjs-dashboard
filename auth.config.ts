@@ -15,6 +15,12 @@ export const authConfig = {
     error: '/login/error',
   },
   callbacks: {
+    signIn() {
+      // You can add your own logic here to check if the user is allowed to sign in
+      // For example, you can check if the user is in a specific role or group
+      // If the user is not allowed, return false to prevent sign-in
+      return true;
+    },
     /**
      * Returning false won't work(Unauthenticated users see the protected resources) after upgrading Nextjs from v14 to v15. Even though I
      * followed the documentation from the following sources:

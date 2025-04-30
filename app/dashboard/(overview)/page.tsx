@@ -9,12 +9,19 @@ import {
 } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
+import { isAuthenticated } from '@/app/ui/isAuthenticated';
 
 export const metadata: Metadata = {
   title: 'Overview',
 };
 
 export default async function Page() {
+  const loginFirst = await isAuthenticated();
+
+  if (loginFirst) {
+    return loginFirst;
+  }
+
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>

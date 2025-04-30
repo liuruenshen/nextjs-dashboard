@@ -1,4 +1,5 @@
 import EditMain from '@/app/ui/invoices/edit-main';
+import { isAuthenticated } from '@/app/ui/isAuthenticated';
 import { Modal } from '@/app/ui/modal';
 
 interface EditProps {
@@ -6,6 +7,12 @@ interface EditProps {
 }
 
 export default async function Page({ params }: EditProps) {
+  const loginFirst = await isAuthenticated();
+
+  if (loginFirst) {
+    return loginFirst;
+  }
+
   const { id } = await params;
 
   return (

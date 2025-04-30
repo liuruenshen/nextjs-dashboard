@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect, RedirectType } from 'next/navigation';
-import { signIn } from '@/auth';
+import { auth, signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 
 export interface GeneralErrorState {
@@ -42,6 +42,13 @@ export async function createInvoice(
   _prevState: CreateInvoiceErrorState,
   formData: FormData,
 ): Promise<CreateInvoiceErrorState> {
+  const session = await auth();
+  if (!session?.user) {
+    return {
+      message: 'You are not authenticated.',
+    };
+  }
+
   const rawFormData = Object.fromEntries(formData.entries());
   const validatedFields = CreateInvoice.safeParse(rawFormData);
 
@@ -91,6 +98,13 @@ export async function updateInvoice(
   _prevState: GeneralErrorState,
   formData: FormData,
 ): Promise<{ message: string }> {
+  const session = await auth();
+  if (!session?.user) {
+    return {
+      message: 'You are not authenticated.',
+    };
+  }
+
   /**
    * Uncomment this line to test the error handling
    */
@@ -121,6 +135,11 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string) {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error('You are not authenticated.');
+  }
+
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');

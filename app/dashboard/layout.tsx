@@ -1,8 +1,9 @@
 import SideNav from '@/app/ui/dashboard/sidenav';
 import { Client } from '../ui/client';
 import React from 'react';
+import { isAuthenticated } from '../ui/isAuthenticated';
 
-export default function Layout({
+export default async function Layout({
   children,
   footer,
   invoiceEdit,
@@ -11,6 +12,12 @@ export default function Layout({
   footer: React.ReactNode;
   invoiceEdit: React.ReactNode;
 }) {
+  const loginFirst = await isAuthenticated();
+
+  if (loginFirst) {
+    return loginFirst;
+  }
+
   return (
     <div
       id="DashboardLayout"
