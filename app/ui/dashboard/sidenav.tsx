@@ -4,21 +4,46 @@ import AcmeLogo from '@/app/ui/acme-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { signOut, auth } from '@/auth';
 import Image from 'next/image';
+import { JSX } from 'react';
+import { REMOTE_PATTERN } from '@/app/next.config.shared';
+import { hasRemoteMatch } from 'next/dist/shared/lib/match-remote-pattern';
+
+interface SafeImageProps {
+  src: string;
+}
+
+function SafeImage({ src }: SafeImageProps) {
+  /**
+   * We have to check in advance to see if the external image is allowed to be loaded. Otherwise,
+   * the 500 error will be thrown by the server.
+   */
+  const canLoad = hasRemoteMatch([], REMOTE_PATTERN, new URL(src));
+
+  return canLoad ? (
+    <Image
+      className="h-7 w-7 rounded-full md:h-10 md:w-10"
+      width={40}
+      height={40}
+      alt=""
+      src={src}
+    />
+  ) : null;
+}
 
 async function Welcome() {
   const session = await auth();
   const welcome = `Hi, ${session?.user?.name}`;
+
+  let avatar: JSX.Element | null = null;
+  try {
+    avatar = session?.user?.image ? (
+      <SafeImage src={session?.user?.image} />
+    ) : null;
+  } catch (e) {}
+
   return (
     <div className="flex w-full flex-row items-center justify-start gap-2 rounded-md bg-sky-200 px-3 py-2">
-      {session?.user?.image ? (
-        <Image
-          className="rounded-full} h-9 w-9"
-          width={40}
-          height={40}
-          alt=""
-          src={session.user.image}
-        />
-      ) : null}
+      {avatar}
       <div>{welcome}</div>
     </div>
   );

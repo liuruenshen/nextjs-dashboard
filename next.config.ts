@@ -1,18 +1,13 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import { NextConfig } from 'next';
+
+const { REMOTE_PATTERN } = require('./app/next.config.shared');
+
+const nextConfig: NextConfig = {
   experimental: {},
   images: {
-    remotePatterns: [
-      new URL('https://github.githubassets.com/assets/**'),
-      {
-        protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    remotePatterns: REMOTE_PATTERN,
   },
-  headers() {
+  async headers() {
     return [
       {
         source: '/((?!_next).*)',
