@@ -1,11 +1,11 @@
 'use server';
 
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
-import { redirect, RedirectType } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { auth, signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { getSqlQuery } from '../../module/getSqlQuery';
 
 export interface GeneralErrorState {
   message: string;
@@ -70,8 +70,9 @@ export async function createInvoice(
 
   // Test it out:
 
+  const sqlQuery = await getSqlQuery();
   try {
-    await sql` INSERT INTO invoices (customer_id, amount, status, date) VALUES (${customerId}, ${amount}, ${status}, ${date})`;
+    await sqlQuery` INSERT INTO invoices (customer_id, amount, status, date) VALUES (${customerId}, ${amount}, ${status}, ${date})`;
   } catch (e) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
@@ -116,8 +117,9 @@ export async function updateInvoice(
     status: formData.get('status'),
   });
 
+  const sqlQuery = await getSqlQuery();
   try {
-    await sql`
+    await sqlQuery`
     UPDATE invoices
     SET customer_id = ${customerId}, amount = ${amount}, status = ${status}
     WHERE id = ${id}
@@ -140,8 +142,9 @@ export async function deleteInvoice(id: string) {
     throw new Error('You are not authenticated.');
   }
 
+  const sqlQuery = await getSqlQuery();
   try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    await sqlQuery`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
   } catch (e) {}
 }

@@ -17,7 +17,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // console.log('🚀 app/layout ~ children:');
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className="antialiased">

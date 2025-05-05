@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { getSqlQuery } from '../../module/getSqlQuery';
 import {
   CustomerField,
   CustomersTableType,
@@ -11,20 +11,17 @@ import {
 import { formatCurrency } from './utils';
 import { unstable_noStore } from 'next/cache';
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
+    const data = await sqlQuery<Revenue>`SELECT * FROM revenue`;
 
     return data.rows;
   } catch (error) {
@@ -36,8 +33,9 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const data = await sql<LatestInvoiceRaw>`
+    const data = await sqlQuery<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
@@ -58,6 +56,8 @@ export async function fetchLatestInvoices() {
 export async function fetchCardData() {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
+
   try {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
@@ -69,7 +69,7 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`; */
 
-    const data = await sql`
+    const data = await sqlQuery`
     SELECT invoices_num, customers_num, paid_invoices_num, pending_invoices_num FROM 
       ( SELECT count(*) as invoices_num FROM "invoices" ),
       ( SELECT count(*) as customers_num FROM "customers" ),
@@ -105,8 +105,9 @@ export async function fetchFilteredInvoices(
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const invoices = await sql<InvoicesTable>`
+    const invoices = await sqlQuery<InvoicesTable>`
       SELECT
         invoices.id,
         invoices.amount,
@@ -137,8 +138,9 @@ export async function fetchFilteredInvoices(
 export async function fetchInvoicesPages(query: string) {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const count = await sql`SELECT COUNT(*)
+    const count = await sqlQuery`SELECT COUNT(*)
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
     WHERE
@@ -160,8 +162,9 @@ export async function fetchInvoicesPages(query: string) {
 export async function getAllInvoiceIds(): Promise<string[]> {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const data = await sql<{ id: string }>`
+    const data = await sqlQuery<{ id: string }>`
       SELECT id FROM invoices
     `;
     console.log('🚀 ~ getAllInvoiceIds ~ data:', data);
@@ -181,8 +184,9 @@ export async function fetchInvoiceById(id: string) {
    */
   //return undefined;
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const data = await sql<InvoiceForm>`
+    const data = await sqlQuery<InvoiceForm>`
       SELECT
         invoices.id,
         invoices.customer_id,
@@ -208,8 +212,9 @@ export async function fetchInvoiceById(id: string) {
 export async function fetchCustomers() {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const data = await sql<CustomerField>`
+    const data = await sqlQuery<CustomerField>`
       SELECT
         id,
         name
@@ -228,8 +233,9 @@ export async function fetchCustomers() {
 export async function fetchFilteredCustomers(query: string) {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const data = await sql<CustomersTableType>`
+    const data = await sqlQuery<CustomersTableType>`
 		SELECT
 		  customers.id,
 		  customers.name,
@@ -263,8 +269,9 @@ export async function fetchFilteredCustomers(query: string) {
 export async function getUser(email: string) {
   unstable_noStore();
 
+  const sqlQuery = await getSqlQuery();
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${email}`;
+    const user = await sqlQuery`SELECT * FROM users WHERE email=${email}`;
     return user.rows[0] as User;
   } catch (error) {
     console.error('Failed to fetch user:', error);

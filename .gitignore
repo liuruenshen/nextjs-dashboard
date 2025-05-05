@@ -35,4 +35,14 @@ yarn-error.log*
 /mainApp/*.tsbuildinfo
 next-env.d.ts
 
-/psql
+/psql/data
+/secret/postgres-password
+/mainApp/.env
+/mainApp/secret
+
+.env.local-postgres
+.env.vercel-cloud
+.vercel_cloud_started
+.vercel_cloud_dev_started
+.local_postgres_started
+.local_postgres_dev_started

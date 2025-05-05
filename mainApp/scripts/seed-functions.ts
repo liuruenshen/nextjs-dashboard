@@ -1,13 +1,21 @@
-const { db } = require('@vercel/postgres');
-const {
+import type { QueryResult, QueryResultRow } from 'pg';
+import {
   invoices,
   customers,
   revenue,
   users,
-} = require('../app/lib/placeholder-data.js');
-const bcrypt = require('bcrypt');
+} from '../app/lib/placeholder-data.js';
+import bcrypt from 'bcrypt';
 
-async function seedUsers(client) {
+interface Client {
+  sql: <O extends QueryResultRow>(
+    query: TemplateStringsArray,
+    ...params: any[]
+  ) => Promise<QueryResult<O>>;
+  release: () => void;
+}
+
+export async function seedUsers(client: Client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
     // Create the "users" table if it doesn't exist
@@ -21,6 +29,14 @@ async function seedUsers(client) {
     `;
 
     console.log(`Created "users" table`);
+
+    const result = await client.sql<{
+      user_count: string;
+    }>`SELECT count(*) AS user_count FROM users;`;
+    if (Number(result.rows[0].user_count) !== 0) {
+      console.log('Users table already seeded');
+      return;
+    }
 
     // Insert data into the "users" table
     const insertedUsers = await Promise.all(
@@ -46,7 +62,7 @@ async function seedUsers(client) {
   }
 }
 
-async function seedInvoices(client) {
+export async function seedInvoices(client: Client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
@@ -62,6 +78,14 @@ async function seedInvoices(client) {
 `;
 
     console.log(`Created "invoices" table`);
+
+    const result = await client.sql<{
+      invoices_count: string;
+    }>`SELECT count(*) AS invoices_count FROM invoices;`;
+    if (Number(result.rows[0].invoices_count) !== 0) {
+      console.log('Invoices table already seeded');
+      return;
+    }
 
     // Insert data into the "invoices" table
     const insertedInvoices = await Promise.all(
@@ -86,7 +110,7 @@ async function seedInvoices(client) {
   }
 }
 
-async function seedCustomers(client) {
+export async function seedCustomers(client: Client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
@@ -101,6 +125,14 @@ async function seedCustomers(client) {
     `;
 
     console.log(`Created "customers" table`);
+
+    const result = await client.sql<{
+      customers_count: string;
+    }>`SELECT count(*) AS customers_count FROM customers;`;
+    if (Number(result.rows[0].customers_count) !== 0) {
+      console.log('Customers table already seeded');
+      return;
+    }
 
     // Insert data into the "customers" table
     const insertedCustomers = await Promise.all(
@@ -125,7 +157,7 @@ async function seedCustomers(client) {
   }
 }
 
-async function seedRevenue(client) {
+export async function seedRevenue(client: Client) {
   try {
     // Create the "revenue" table if it doesn't exist
     const createTable = await client.sql`
@@ -136,6 +168,14 @@ async function seedRevenue(client) {
     `;
 
     console.log(`Created "revenue" table`);
+
+    const result = await client.sql<{
+      revenue_count: string;
+    }>`SELECT count(*) AS revenue_count FROM revenue;`;
+    if (Number(result.rows[0].revenue_count) !== 0) {
+      console.log('Revenue table already seeded');
+      return;
+    }
 
     // Insert data into the "revenue" table
     const insertedRevenue = await Promise.all(
@@ -159,21 +199,3 @@ async function seedRevenue(client) {
     throw error;
   }
 }
-
-async function main() {
-  const client = await db.connect();
-
-  await seedUsers(client);
-  await seedCustomers(client);
-  await seedInvoices(client);
-  await seedRevenue(client);
-
-  await client.end();
-}
-
-main().catch((err) => {
-  console.error(
-    'An error occurred while attempting to seed the database:',
-    err,
-  );
-});

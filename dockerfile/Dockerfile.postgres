@@ -1,0 +1,5 @@
+FROM postgres:17.4
+
+COPY ./secret/postgres-password /secret/postgres-password
+COPY ./psql/initdb /docker-entrypoint-initdb.d/
+HEALTHCHECK CMD pg_isready -U postgres -d next-dashboard

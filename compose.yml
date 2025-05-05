@@ -1,0 +1,30 @@
+services:
+  db:
+    image: next-dashboard-db-local
+    build:
+      context: .
+      dockerfile: dockerfile/Dockerfile.postgres
+      tags:
+        - next-dashboard-db-local
+    environment:
+      - POSTGRES_PASSWORD_FILE=/secret/postgres-password
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=password
+    volumes:
+      - ./psql/data:/var/lib/postgresql/data
+    pull_policy: build
+    container_name: next-dashboard-db-local-container
+  app:
+    image: next-dashboard-app-local
+    build:
+      context: .
+      dockerfile: dockerfile/Dockerfile.app
+      args:
+        local_postgres: true
+        is_dev: ${IS_DEV:-false}
+      tags:
+        - next-dashboard-app-local
+    ports:
+      - "3000:3000"
+    pull_policy: build
+    container_name: next-dashboard-app-local-container

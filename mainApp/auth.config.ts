@@ -14,6 +14,7 @@ export const authConfig = {
     signIn: '/login',
     error: '/login/error',
   },
+  trustHost: true,
   callbacks: {
     signIn() {
       // You can add your own logic here to check if the user is allowed to sign in

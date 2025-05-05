@@ -3,8 +3,8 @@ import { authConfig } from './auth.config';
 import credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import { User } from './app/lib/definitions';
-import { sql } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
+import { getSqlQuery } from './module/getSqlQuery';
 
 const CredentialSchema = z.object({
   email: z.string().email(),
@@ -12,9 +12,12 @@ const CredentialSchema = z.object({
 });
 
 async function getUser(email: string): Promise<User | undefined> {
-  try {
-    const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+  const query = await getSqlQuery();
 
+  try {
+    const user = await query<User>`SELECT * FROM users WHERE email=${email}`;
+
+    console.log('🚀 ~ getUser ~ user:', user);
     return user.rows[0];
   } catch (e) {
     console.error('Failed to fetch user:', e);
