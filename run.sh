@@ -4,7 +4,7 @@ set -e
 
 APP_IMAGE_NAME="next-dashboard-app"
 APP_CONTAINER_NAME="next-dashboard-app-container"
-APP_IMAGE_LOCAL_POSTGRES_NAME="next-dashboard-app-local"
+APP_IMAGE_LOCAL_NAME="next-dashboard-app-local"
 DB_IMAGE_NAME="next-dashboard-db-local"
 APP_LOCAL_CONTAINER_NAME="next-dashboard-app-local-container"
 
@@ -28,7 +28,7 @@ start_vercel_cloud() {
     return 1
   fi
 
-  if [ -n $(docker image ls "${APP_IMAGE_NAME}" -q) ]; then
+  if [ -n "$(docker image ls "${APP_IMAGE_NAME}" -q)" ]; then
     echo "Image exists. Removing the image..."
     docker image rm -f "${APP_IMAGE_NAME}"
   fi
@@ -73,10 +73,27 @@ stop_vercel_cloud() {
   docker container stop "${APP_CONTAINER_NAME}"
   rm -f ./mainApp/.env
   rm -rf ./mainApp/secret
+  if [ -n "$(docker image ls "${APP_IMAGE_NAME}" -q)" ]; then
+    echo "Image exists. Removing the image..."
+    docker image rm -f "${APP_IMAGE_NAME}"
+  fi
 }
 
 stop_vercel_cloud_dev() {
   stop_vercel_cloud
+}
+
+remove_local_image() {
+  echo "Removing the local images..."
+  if [ -n "$(docker image ls "${DB_IMAGE_NAME}" -q)" ]; then
+    echo "Image exists. Removing the image(${DB_IMAGE_NAME})..."
+    docker image rm -f "${DB_IMAGE_NAME}"
+  fi
+
+  if [ -n "$(docker image ls "${APP_IMAGE_LOCAL_NAME}" -q)" ]; then
+    echo "Image exists. Removing the image("${APP_IMAGE_LOCAL_NAME}")..."
+    docker image rm -f "${APP_IMAGE_LOCAL_NAME}"
+  fi
 }
 
 remove_local_postgres() {
@@ -88,22 +105,14 @@ remove_local_postgres() {
   rm -rf ./mainApp/secret
   echo "Wipe out the local database..."
   rm -rf './psql/data'
-
-  if [ -n "$(docker image ls "${DB_IMAGE_NAME}" -q)" ]; then
-    echo "Image exists. Removing the image(${DB_IMAGE_NAME})..."
-    docker image rm -f "${DB_IMAGE_NAME}"
-  fi
-
-  if [ -n "$(docker image ls "${APP_IMAGE_LOCAL_POSTGRES_NAME}" -q)" ]; then
-    echo "Image exists. Removing the image("${APP_IMAGE_LOCAL_POSTGRES_NAME}")..."
-    docker image rm -f "${APP_IMAGE_LOCAL_POSTGRES_NAME}"
-  fi
+  remove_local_image
 }
 
 stop_local_postgres() {
   docker compose down
   rm -f ./mainApp/.env
   rm -rf ./mainApp/secret
+  remove_local_image
 }
 
 are_services_ready() {
