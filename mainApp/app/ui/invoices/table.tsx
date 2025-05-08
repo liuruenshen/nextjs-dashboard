@@ -1,17 +1,82 @@
+'use client';
+
 import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import { useState } from 'react';
+import { InvoicesTable } from '@/app/lib/definitions';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default async function InvoicesTable({
-  query,
-  currentPage,
-}: {
-  query: string;
-  currentPage: number;
-}) {
-  const invoices = await fetchFilteredInvoices(query, currentPage);
+interface SortingIndicatorProps {
+  columnId: string;
+  activeColumnId: string;
+  direction: 'asc' | 'desc';
+  onClick: (direction: SortingIndicatorProps['direction']) => void;
+}
+
+function SortingIndicator({
+  columnId,
+  activeColumnId,
+  direction,
+  onClick,
+}: SortingIndicatorProps) {
+  if (columnId !== activeColumnId) {
+    return (
+      <div
+        className="flex cursor-pointer flex-col"
+        onClick={() => onClick('asc')}
+      >
+        <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl [&.material-symbols-outlined]:[line-height:0.6rem]">
+          arrow_drop_up
+        </span>
+        <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl [&.material-symbols-outlined]:[line-height:0.6rem]">
+          arrow_drop_down
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex cursor-pointer flex-col [&[data-order=desc]]:rotate-180"
+      onClick={() => onClick(direction === 'asc' ? 'desc' : 'asc')}
+      data-order={direction}
+    >
+      <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl">
+        arrow_drop_up
+      </span>
+    </div>
+  );
+}
+
+interface InvoicesTableProps {
+  invoices: InvoicesTable[];
+}
+
+export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [sortingActiveColumnId, setSortingActiveColumnId] =
+    useState<string>('customer');
+  const [sortingDirection, setSortingDirection] = useState<'asc' | 'desc'>(
+    'asc',
+  );
+
+  function sorting(activeColumnId: string, direction: 'asc' | 'desc') {
+    const searchParamsData = Object.fromEntries(searchParams.entries());
+
+    setSortingActiveColumnId(activeColumnId);
+    setSortingDirection(direction);
+
+    searchParamsData.sortBy = activeColumnId;
+    searchParamsData.sortDirection = direction;
+
+    const searchParamsString = new URLSearchParams(searchParamsData).toString();
+    router.replace(`/dashboard/invoices?${searchParamsString}`);
+  }
 
   return (
     <div className="mt-6 flow-root">
@@ -57,20 +122,73 @@ export default async function InvoicesTable({
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
+                <th
+                  scope="col"
+                  className="items-center gap-1 px-4 py-5 font-medium sm:pl-6"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Customer</span>
+                    <SortingIndicator
+                      columnId="customer"
+                      activeColumnId={sortingActiveColumnId}
+                      direction={sortingDirection}
+                      onClick={(direction) => {
+                        sorting('customer', direction);
+                      }}
+                    />
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Email
+                  <div className="flex items-center gap-1">
+                    <span>Email</span>
+                    <SortingIndicator
+                      columnId="email"
+                      activeColumnId={sortingActiveColumnId}
+                      direction={sortingDirection}
+                      onClick={(direction) => {
+                        sorting('email', direction);
+                      }}
+                    />
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Amount
+                  <div className="flex items-center gap-1">
+                    <span>Amount</span>
+                    <SortingIndicator
+                      columnId="amount"
+                      activeColumnId={sortingActiveColumnId}
+                      direction={sortingDirection}
+                      onClick={(direction) => {
+                        sorting('amount', direction);
+                      }}
+                    />
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Date
+                  <div className="flex items-center gap-1">
+                    <span>Date</span>
+                    <SortingIndicator
+                      columnId="date"
+                      activeColumnId={sortingActiveColumnId}
+                      direction={sortingDirection}
+                      onClick={(direction) => {
+                        sorting('date', direction);
+                      }}
+                    />
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Status
+                  <div className="flex items-center gap-1">
+                    <span>Status</span>
+                    <SortingIndicator
+                      columnId="status"
+                      activeColumnId={sortingActiveColumnId}
+                      direction={sortingDirection}
+                      onClick={(direction) => {
+                        sorting('status', direction);
+                      }}
+                    />
+                  </div>
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>

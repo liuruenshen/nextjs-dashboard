@@ -1,6 +1,6 @@
 import Pagination from '@/app/ui/invoices/pagination';
 import Search from '@/app/ui/search';
-import Table from '@/app/ui/invoices/table';
+import Table from '@/app/dashboard/invoices/table';
 import { CreateInvoice } from '@/app/ui/invoices/buttons';
 import { lusitana } from '@/app/ui/fonts';
 import { InvoicesTableSkeleton, PaginationSkeleton } from '@/app/ui/skeletons';
@@ -17,6 +17,8 @@ interface InvoicesPageProps {
   searchParams?: Promise<{
     query?: string;
     page?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
   }>;
 }
 
@@ -39,6 +41,8 @@ export default async function Page({ searchParams }: InvoicesPageProps) {
   const params = await searchParams;
   const query = params?.query || '';
   const currentPage = Number(params?.page ?? 1);
+  const sortBy = params?.sortBy || 'customer';
+  const sortDirection = params?.sortDirection || 'asc';
 
   return (
     <div className="w-full">
@@ -50,7 +54,12 @@ export default async function Page({ searchParams }: InvoicesPageProps) {
         <CreateInvoice />
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
-        <Table query={query} currentPage={currentPage} />
+        <Table
+          query={query}
+          currentPage={currentPage}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+        />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Suspense fallback={<PaginationSkeleton />}>

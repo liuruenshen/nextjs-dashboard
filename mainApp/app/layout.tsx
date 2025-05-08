@@ -20,6 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`}>
       <body className="antialiased">
+        {/* eslint-disable-next-line */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,100,1,200&icon_names=arrow_drop_down,arrow_drop_up"
+          rel="stylesheet"
+        />
         {children}
         <div id="modal-root" />
       </body>

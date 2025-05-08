@@ -104,12 +104,35 @@ export async function fetchCardData() {
   }
 }
 
+interface FetchFilteredInvoicesProps {
+  query: string;
+  currentPage: number;
+  sortBy: string;
+  sortDirection: 'asc' | 'desc';
+}
+
 const ITEMS_PER_PAGE = 6;
-export async function fetchFilteredInvoices(
-  query: string,
-  currentPage: number,
-) {
+
+const SORT_BY_MAP: Record<string, [string, string]> = {
+  customer: ['customers', 'name'],
+  amount: ['invoices', 'amount'],
+  date: ['invoices', 'date'],
+  status: ['invoices', 'status'],
+  email: ['customers', 'email'],
+};
+
+export async function fetchFilteredInvoices({
+  query,
+  currentPage,
+  sortBy,
+  sortDirection,
+}: FetchFilteredInvoicesProps) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const sortByField = (SORT_BY_MAP[sortBy] || SORT_BY_MAP[0]).map(
+    (value) => `${value}/I`,
+  ) as [string, string];
+  const sortDirectionSql = `${sortDirection === 'asc' ? 'ASC' : 'DESC'}/s`;
 
   const [sqlQuery, release] = await getSqlQuery();
   try {
@@ -130,7 +153,7 @@ export async function fetchFilteredInvoices(
         invoices.amount::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
-      ORDER BY customers.name ASC
+      ORDER BY ${sortByField[0]}.${sortByField[1]} ${sortDirectionSql}
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
