@@ -1,8 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { psql } from './psql';
+import { psql, vercelSqlFormat } from './psql';
 import { Pool, QueryResult, QueryResultRow } from 'pg';
-import { sql } from '@vercel/postgres';
 import { Primitive } from './pgSqlTemplate';
 
 let pool: Pool | null = null;
@@ -10,7 +9,6 @@ let pool: Pool | null = null;
 export async function getSqlQuery() {
   async function initLocalSqlQuery() {
     if (!pool) {
-      console.log('🚀 ~ initLocalSqlQuery ~ pool: init a pool');
       const url = new URL(import.meta.url);
       const filename = path.join(
         path.dirname(url.pathname),
@@ -44,6 +42,6 @@ export async function getSqlQuery() {
     [localSqlQuery, release] = await initLocalSqlQuery();
     return [localSqlQuery, release] as const;
   } else {
-    return [sql, () => {}] as const;
+    return [vercelSqlFormat, () => {}] as const;
   }
 }
