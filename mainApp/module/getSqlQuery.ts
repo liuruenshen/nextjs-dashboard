@@ -5,42 +5,45 @@ import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { sql } from '@vercel/postgres';
 import { Primitive } from './pgSqlTemplate';
 
+let pool: Pool | null = null;
+
 export async function getSqlQuery() {
-  let localSqlQuery:
-    | (<O extends QueryResultRow>(
-        query: TemplateStringsArray,
-        ...values: Primitive[]
-      ) => Promise<QueryResult<O>>)
-    | null = null;
-
   async function initLocalSqlQuery() {
-    const url = new URL(import.meta.url);
-    const filename = path.join(
-      path.dirname(url.pathname),
-      '../secret/postgres-password',
-    );
-    const password = fs.readFileSync(filename, 'utf8');
+    if (!pool) {
+      console.log('🚀 ~ initLocalSqlQuery ~ pool: init a pool');
+      const url = new URL(import.meta.url);
+      const filename = path.join(
+        path.dirname(url.pathname),
+        '../secret/postgres-password',
+      );
+      const password = fs.readFileSync(filename, 'utf8');
 
-    const pool: Pool = new Pool({
-      user: 'postgres',
-      password,
-      host: 'db',
-      port: 5432,
-      database: 'next-dashboard',
-    });
+      pool = new Pool({
+        user: 'postgres',
+        password,
+        host: 'db',
+        port: 5432,
+        database: 'next-dashboard',
+      });
+    }
 
     const client = await pool.connect();
     const proxiedClient = psql(client);
-    return proxiedClient.sql;
+    return [proxiedClient.sql, client.release.bind(client)] as const;
   }
 
   if (process.env.LOCAL_POSTGRES === 'true') {
-    if (!localSqlQuery) {
-      localSqlQuery = await initLocalSqlQuery();
-    }
+    let release: (() => void) | null = null;
+    let localSqlQuery:
+      | (<O extends QueryResultRow>(
+          query: TemplateStringsArray,
+          ...values: Primitive[]
+        ) => Promise<QueryResult<O>>)
+      | null = null;
 
-    return localSqlQuery;
+    [localSqlQuery, release] = await initLocalSqlQuery();
+    return [localSqlQuery, release] as const;
   } else {
-    return sql;
+    return [sql, () => {}] as const;
   }
 }

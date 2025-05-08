@@ -12,7 +12,7 @@ const CredentialSchema = z.object({
 });
 
 async function getUser(email: string): Promise<User | undefined> {
-  const query = await getSqlQuery();
+  const [query, release] = await getSqlQuery();
 
   try {
     const user = await query<User>`SELECT * FROM users WHERE email=${email}`;
@@ -22,6 +22,8 @@ async function getUser(email: string): Promise<User | undefined> {
   } catch (e) {
     console.error('Failed to fetch user:', e);
     throw new Error('Failed to fetch user.');
+  } finally {
+    release();
   }
 }
 

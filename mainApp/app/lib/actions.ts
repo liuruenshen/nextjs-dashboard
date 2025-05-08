@@ -70,13 +70,15 @@ export async function createInvoice(
 
   // Test it out:
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     await sqlQuery` INSERT INTO invoices (customer_id, amount, status, date) VALUES (${customerId}, ${amount}, ${status}, ${date})`;
   } catch (e) {
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
+  } finally {
+    release();
   }
 
   revalidatePath('/dashboard/invoices');
@@ -117,7 +119,7 @@ export async function updateInvoice(
     status: formData.get('status'),
   });
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     await sqlQuery`
     UPDATE invoices
@@ -126,8 +128,9 @@ export async function updateInvoice(
   `;
   } catch (e) {
     return { message: 'Database Error: Failed to Update Invoice.' };
+  } finally {
+    release();
   }
-
   revalidatePath('/dashboard/invoices');
   if (needRedirect) {
     redirect('/dashboard/invoices');
@@ -142,11 +145,14 @@ export async function deleteInvoice(id: string) {
     throw new Error('You are not authenticated.');
   }
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     await sqlQuery`DELETE FROM invoices WHERE id = ${id}`;
     revalidatePath('/dashboard/invoices');
-  } catch (e) {}
+  } catch (e) {
+  } finally {
+    release();
+  }
 }
 
 // ...

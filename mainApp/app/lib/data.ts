@@ -16,7 +16,7 @@ export async function fetchRevenue() {
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
@@ -27,13 +27,15 @@ export async function fetchRevenue() {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch revenue data.');
+  } finally {
+    release();
   }
 }
 
 export async function fetchLatestInvoices() {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -50,13 +52,15 @@ export async function fetchLatestInvoices() {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch the latest invoices.');
+  } finally {
+    release();
   }
 }
 
 export async function fetchCardData() {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
 
   try {
     // You can probably combine these into a single SQL query
@@ -95,6 +99,8 @@ export async function fetchCardData() {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch card data.');
+  } finally {
+    release();
   }
 }
 
@@ -105,7 +111,7 @@ export async function fetchFilteredInvoices(
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const invoices = await sqlQuery<InvoicesTable>`
       SELECT
@@ -132,13 +138,15 @@ export async function fetchFilteredInvoices(
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoices.');
+  } finally {
+    release();
   }
 }
 
 export async function fetchInvoicesPages(query: string) {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const count = await sqlQuery`SELECT COUNT(*)
     FROM invoices
@@ -156,13 +164,15 @@ export async function fetchInvoicesPages(query: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of invoices.');
+  } finally {
+    release();
   }
 }
 
 export async function getAllInvoiceIds(): Promise<string[]> {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<{ id: string }>`
       SELECT id FROM invoices
@@ -173,6 +183,8 @@ export async function getAllInvoiceIds(): Promise<string[]> {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch all invoice IDs.');
+  } finally {
+    release();
   }
 }
 
@@ -184,7 +196,7 @@ export async function fetchInvoiceById(id: string) {
    */
   //return undefined;
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<InvoiceForm>`
       SELECT
@@ -206,13 +218,15 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
+  } finally {
+    release();
   }
 }
 
 export async function fetchCustomers() {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<CustomerField>`
       SELECT
@@ -227,13 +241,15 @@ export async function fetchCustomers() {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');
+  } finally {
+    release();
   }
 }
 
 export async function fetchFilteredCustomers(query: string) {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<CustomersTableType>`
 		SELECT
@@ -263,18 +279,22 @@ export async function fetchFilteredCustomers(query: string) {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch customer table.');
+  } finally {
+    release();
   }
 }
 
 export async function getUser(email: string) {
   unstable_noStore();
 
-  const sqlQuery = await getSqlQuery();
+  const [sqlQuery, release] = await getSqlQuery();
   try {
     const user = await sqlQuery`SELECT * FROM users WHERE email=${email}`;
     return user.rows[0] as User;
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
+  } finally {
+    release();
   }
 }
