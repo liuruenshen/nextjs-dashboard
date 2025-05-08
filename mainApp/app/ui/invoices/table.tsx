@@ -6,7 +6,6 @@ import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { useState } from 'react';
 import { InvoicesTable } from '@/app/lib/definitions';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SortingIndicatorProps {
@@ -28,10 +27,10 @@ function SortingIndicator({
         className="flex cursor-pointer flex-col"
         onClick={() => onClick('asc')}
       >
-        <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl [&.material-symbols-outlined]:[line-height:0.6rem]">
+        <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl [&.material-symbols-outlined]:text-gray-500 [&.material-symbols-outlined]:[line-height:0.6rem]">
           arrow_drop_up
         </span>
-        <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl [&.material-symbols-outlined]:[line-height:0.6rem]">
+        <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl [&.material-symbols-outlined]:text-gray-500 [&.material-symbols-outlined]:[line-height:0.6rem]">
           arrow_drop_down
         </span>
       </div>
@@ -44,7 +43,7 @@ function SortingIndicator({
       onClick={() => onClick(direction === 'asc' ? 'desc' : 'asc')}
       data-order={direction}
     >
-      <span className="material-symbols-outlined [&.material-symbols-outlined]:text-4xl">
+      <span className="material-symbols-outlined [&.material-symbols-outlined]:text-5xl [&.material-symbols-outlined]:[line-height:1rem]">
         arrow_drop_up
       </span>
     </div>
