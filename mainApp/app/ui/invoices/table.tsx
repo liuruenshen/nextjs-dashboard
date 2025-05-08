@@ -4,12 +4,13 @@ import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { useState } from 'react';
 import { InvoicesTable } from '@/app/lib/definitions';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+type ColumnId = 'customer' | 'email' | 'amount' | 'date' | 'status';
+
 interface SortingIndicatorProps {
-  columnId: string;
+  columnId: ColumnId;
   activeColumnId: string;
   direction: 'asc' | 'desc';
   onClick: (direction: SortingIndicatorProps['direction']) => void;
@@ -54,21 +55,31 @@ interface InvoicesTableProps {
   invoices: InvoicesTable[];
 }
 
+function getSortingDirection(value: string | null): 'asc' | 'desc' {
+  return value !== 'asc' && value !== 'desc' ? 'asc' : value;
+}
+
+function getSortBy(value: string | null): ColumnId {
+  if (value === 'customer') return value;
+  if (value === 'email') return value;
+  if (value === 'amount') return value;
+  if (value === 'date') return value;
+  if (value === 'status') return value;
+
+  return 'customer';
+}
+
 export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [sortingActiveColumnId, setSortingActiveColumnId] =
-    useState<string>('customer');
-  const [sortingDirection, setSortingDirection] = useState<'asc' | 'desc'>(
-    'asc',
+  const sortingActiveColumnId = getSortBy(searchParams.get('sortBy'));
+  const sortingDirection = getSortingDirection(
+    searchParams.get('sortDirection'),
   );
 
   function sorting(activeColumnId: string, direction: 'asc' | 'desc') {
     const searchParamsData = Object.fromEntries(searchParams.entries());
-
-    setSortingActiveColumnId(activeColumnId);
-    setSortingDirection(direction);
 
     searchParamsData.sortBy = activeColumnId;
     searchParamsData.sortDirection = direction;
