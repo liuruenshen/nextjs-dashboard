@@ -129,12 +129,12 @@ export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
               </div>
             ))}
           </div>
-          <table className="hidden min-w-full text-gray-900 md:table">
+          <table className="hidden w-full min-w-full table-fixed text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th
                   scope="col"
-                  className="items-center gap-1 px-4 py-5 font-medium sm:pl-6"
+                  className="w-[24%] items-center gap-1 px-4 py-5 font-medium sm:pl-6"
                 >
                   <div className="flex items-center gap-1">
                     <span>Customer</span>
@@ -148,7 +148,7 @@ export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
                     />
                   </div>
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="w-[24%] px-3 py-5 font-medium">
                   <div className="flex items-center gap-1">
                     <span>Email</span>
                     <SortingIndicator
@@ -161,7 +161,7 @@ export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
                     />
                   </div>
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="w-[15%] px-3 py-5 font-medium">
                   <div className="flex items-center gap-1">
                     <span>Amount</span>
                     <SortingIndicator
@@ -174,7 +174,7 @@ export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
                     />
                   </div>
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="w-[15%] px-3 py-5 font-medium">
                   <div className="flex items-center gap-1">
                     <span>Date</span>
                     <SortingIndicator
@@ -220,13 +220,15 @@ export function ClientInvoicesTable({ invoices }: InvoicesTableProps) {
                         height={28}
                         alt={`${invoice.name}'s profile picture`}
                       />
-                      <p>{invoice.name}</p>
+                      <p className="overflow-hidden overflow-ellipsis">
+                        {invoice.name}
+                      </p>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="overflow-hidden overflow-ellipsis whitespace-nowrap px-3 py-3">
                     {invoice.email}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="overflow-hidden overflow-ellipsis whitespace-nowrap px-3 py-3">
                     {formatCurrency(invoice.amount)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
