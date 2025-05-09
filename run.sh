@@ -145,7 +145,7 @@ start_local_postgres_dev() {
     return 1
   fi
 
-  IS_DEV=true docker compose -f ./compose.yml -f ./compose-dev.yml up -d
+  IS_DEV=true DEBUG_LOG="${1}" docker compose -f ./compose.yml -f ./compose-dev.yml up -d
   setup_dev_env true
 
   are_services_ready

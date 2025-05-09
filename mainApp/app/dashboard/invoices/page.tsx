@@ -40,6 +40,10 @@ async function PaginationWrapper({
   query,
   itemsPerPageParam,
 }: PaginationWrapperProps) {
+  if (process.env.DEBUG_LOG) {
+    console.log('calling fetchInvoicesPages in PaginationWrapper');
+  }
+
   const { totalPages, itemsPerPage } = await fetchInvoicesPages(
     query,
     itemsPerPageParam,
@@ -70,6 +74,9 @@ export default async function Page({ searchParams }: InvoicesPageProps) {
     MAX_ITEMS_PER_PAGE,
   );
 
+  if (process.env.DEBUG_LOG) {
+    console.log('calling fetchInvoicesPages in /dashboard/invoices/page.tsx');
+  }
   const { totalPages } = await fetchInvoicesPages(query, itemsPerPage);
   if (currentPage > totalPages) {
     const urlParams = new URLSearchParams({ ...params, page: '1' });

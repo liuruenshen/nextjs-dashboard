@@ -1,4 +1,6 @@
 services:
   app:
+    environment:
+      - DEBUG_LOG="${DEBUG_LOG}"
     volumes:
       - ./mainApp:/mainApp

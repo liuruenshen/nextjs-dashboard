@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { getSqlQuery } from '../../module/getSqlQuery';
 
 import {
@@ -10,13 +11,8 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
-import { unstable_noStore } from 'next/cache';
 
-export async function fetchRevenue() {
-  // Add noStore() here to prevent the response from being cached.
-  // This is equivalent to in fetch(..., {cache: 'no-store'}).
-  unstable_noStore();
-
+async function _fetchRevenue() {
   const [sqlQuery, release] = await getSqlQuery();
   try {
     // Artificially delay a response for demo purposes.
@@ -33,9 +29,13 @@ export async function fetchRevenue() {
   }
 }
 
-export async function fetchLatestInvoices() {
-  unstable_noStore();
+/**
+ * https://nextjs.org/docs/app/deep-dive/caching#react-cache-function
+ * https://react.dev/reference/react/cache
+ */
+export const fetchRevenue = cache(_fetchRevenue);
 
+async function _fetchLatestInvoices() {
   const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<LatestInvoiceRaw>`
@@ -58,9 +58,9 @@ export async function fetchLatestInvoices() {
   }
 }
 
-export async function fetchCardData() {
-  unstable_noStore();
+export const fetchLatestInvoices = cache(_fetchLatestInvoices);
 
+async function _fetchCardData() {
   const [sqlQuery, release] = await getSqlQuery();
 
   try {
@@ -105,6 +105,8 @@ export async function fetchCardData() {
   }
 }
 
+export const fetchCardData = cache(_fetchCardData);
+
 interface FetchFilteredInvoicesProps {
   query: string;
   currentPage: number;
@@ -121,7 +123,7 @@ const SORT_BY_MAP: Record<string, [string, string]> = {
   email: ['customers', 'email'],
 };
 
-export async function fetchFilteredInvoices({
+async function _fetchFilteredInvoices({
   query,
   currentPage,
   sortBy,
@@ -167,8 +169,12 @@ export async function fetchFilteredInvoices({
   }
 }
 
-export async function fetchInvoicesPages(query: string, itemsPerPage: number) {
-  unstable_noStore();
+export const fetchFilteredInvoices = cache(_fetchFilteredInvoices);
+
+async function _fetchInvoicesPages(query: string, itemsPerPage: number) {
+  if (process.env.DEBUG_LOG) {
+    console.log('🚀 ~ _fetchInvoicesPages ~ query:', query, itemsPerPage);
+  }
 
   const [sqlQuery, release] = await getSqlQuery();
   try {
@@ -193,9 +199,9 @@ export async function fetchInvoicesPages(query: string, itemsPerPage: number) {
   }
 }
 
-export async function getAllInvoiceIds(): Promise<string[]> {
-  unstable_noStore();
+export const fetchInvoicesPages = cache(_fetchInvoicesPages);
 
+async function _getAllInvoiceIds(): Promise<string[]> {
   const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<{ id: string }>`
@@ -211,9 +217,9 @@ export async function getAllInvoiceIds(): Promise<string[]> {
   }
 }
 
-export async function fetchInvoiceById(id: string) {
-  unstable_noStore();
+export const getAllInvoiceIds = cache(_getAllInvoiceIds);
 
+async function _fetchInvoiceById(id: string) {
   /**
    * Uncomment this line to test the 404 not-found error handling
    */
@@ -246,9 +252,9 @@ export async function fetchInvoiceById(id: string) {
   }
 }
 
-export async function fetchCustomers() {
-  unstable_noStore();
+export const fetchInvoiceById = cache(_fetchInvoiceById);
 
+async function _fetchCustomers() {
   const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<CustomerField>`
@@ -269,9 +275,9 @@ export async function fetchCustomers() {
   }
 }
 
-export async function fetchFilteredCustomers(query: string) {
-  unstable_noStore();
+export const fetchCustomers = cache(_fetchCustomers);
 
+async function _fetchFilteredCustomers(query: string) {
   const [sqlQuery, release] = await getSqlQuery();
   try {
     const data = await sqlQuery<CustomersTableType>`
@@ -307,9 +313,9 @@ export async function fetchFilteredCustomers(query: string) {
   }
 }
 
-export async function getUser(email: string) {
-  unstable_noStore();
+export const fetchFilteredCustomers = cache(_fetchFilteredCustomers);
 
+async function _getUser(email: string) {
   const [sqlQuery, release] = await getSqlQuery();
   try {
     const user = await sqlQuery`SELECT * FROM users WHERE email=${email}`;
@@ -321,3 +327,5 @@ export async function getUser(email: string) {
     release();
   }
 }
+
+export const getUser = cache(_getUser);
