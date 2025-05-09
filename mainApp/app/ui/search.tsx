@@ -7,7 +7,7 @@ import {
 import clsx from 'clsx';
 
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { Input } from './input';
 

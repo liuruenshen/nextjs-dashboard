@@ -1,4 +1,5 @@
 import { getSqlQuery } from '../../module/getSqlQuery';
+
 import {
   CustomerField,
   CustomersTableType,
@@ -109,9 +110,8 @@ interface FetchFilteredInvoicesProps {
   currentPage: number;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
+  itemsPerPage: number;
 }
-
-const ITEMS_PER_PAGE = 6;
 
 const SORT_BY_MAP: Record<string, [string, string]> = {
   customer: ['customers', 'name'],
@@ -126,13 +126,14 @@ export async function fetchFilteredInvoices({
   currentPage,
   sortBy,
   sortDirection,
+  itemsPerPage,
 }: FetchFilteredInvoicesProps) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
   const sortByField = (SORT_BY_MAP[sortBy] || SORT_BY_MAP[0]).map(
     (value) => `${value}/I`,
   ) as [string, string];
   const sortDirectionSql = `${sortDirection === 'asc' ? 'ASC' : 'DESC'}/s`;
+
+  const offset = (currentPage - 1) * itemsPerPage;
 
   const [sqlQuery, release] = await getSqlQuery();
   try {
@@ -154,7 +155,7 @@ export async function fetchFilteredInvoices({
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
       ORDER BY ${sortByField[0]}.${sortByField[1]} ${sortDirectionSql}
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+      LIMIT ${itemsPerPage} OFFSET ${offset}
     `;
 
     return invoices.rows;
@@ -166,7 +167,7 @@ export async function fetchFilteredInvoices({
   }
 }
 
-export async function fetchInvoicesPages(query: string) {
+export async function fetchInvoicesPages(query: string, itemsPerPage: number) {
   unstable_noStore();
 
   const [sqlQuery, release] = await getSqlQuery();
@@ -182,8 +183,8 @@ export async function fetchInvoicesPages(query: string) {
       invoices.status ILIKE ${`%${query}%`}
   `;
 
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
+    const totalPages = Math.ceil(Number(count.rows[0].count) / itemsPerPage);
+    return { totalPages, itemsPerPage };
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total number of invoices.');
@@ -200,7 +201,6 @@ export async function getAllInvoiceIds(): Promise<string[]> {
     const data = await sqlQuery<{ id: string }>`
       SELECT id FROM invoices
     `;
-    console.log('🚀 ~ getAllInvoiceIds ~ data:', data);
 
     return data.rows.map((invoice) => invoice.id);
   } catch (error) {

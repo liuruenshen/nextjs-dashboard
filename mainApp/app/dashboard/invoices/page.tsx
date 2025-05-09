@@ -8,6 +8,14 @@ import { Suspense } from 'react';
 import { fetchInvoicesPages } from '@/app/lib/data';
 import { Metadata } from 'next';
 import { isAuthenticated } from '@/app/ui/isAuthenticated';
+import { ItemsPerPage } from '@/app/ui/invoices/itemsPerPage';
+import {
+  ITEMS_PER_PAGE,
+  MAX_ITEMS_PER_PAGE,
+  MIN_ITEMS_PER_PAGE,
+} from '@/app/lib/const';
+import { clamp, getSafeNumber } from '@/app/lib/utils';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Invoices',
@@ -19,16 +27,29 @@ interface InvoicesPageProps {
     page?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+    itemsPerPage?: string;
   }>;
 }
 
 interface PaginationWrapperProps {
   query: string;
+  itemsPerPageParam: number;
 }
 
-async function PaginationWrapper({ query }: PaginationWrapperProps) {
-  const totalPages = await fetchInvoicesPages(query);
-  return <Pagination totalPages={totalPages} />;
+async function PaginationWrapper({
+  query,
+  itemsPerPageParam,
+}: PaginationWrapperProps) {
+  const { totalPages, itemsPerPage } = await fetchInvoicesPages(
+    query,
+    itemsPerPageParam,
+  );
+  return (
+    <>
+      <Pagination totalPages={totalPages} />
+      <ItemsPerPage itemsPerPage={itemsPerPage} />
+    </>
+  );
 }
 
 export default async function Page({ searchParams }: InvoicesPageProps) {
@@ -40,9 +61,20 @@ export default async function Page({ searchParams }: InvoicesPageProps) {
 
   const params = await searchParams;
   const query = params?.query || '';
-  const currentPage = Number(params?.page ?? 1);
+  const currentPage = getSafeNumber(params?.page, 1);
   const sortBy = params?.sortBy || 'customer';
   const sortDirection = params?.sortDirection || 'asc';
+  const itemsPerPage = clamp(
+    MIN_ITEMS_PER_PAGE,
+    getSafeNumber(params?.itemsPerPage, ITEMS_PER_PAGE),
+    MAX_ITEMS_PER_PAGE,
+  );
+
+  const { totalPages } = await fetchInvoicesPages(query, itemsPerPage);
+  if (currentPage > totalPages) {
+    const urlParams = new URLSearchParams({ ...params, page: '1' });
+    redirect(`/dashboard/invoices?${urlParams.toString()}`);
+  }
 
   return (
     <div className="w-full">
@@ -59,11 +91,12 @@ export default async function Page({ searchParams }: InvoicesPageProps) {
           currentPage={currentPage}
           sortBy={sortBy}
           sortDirection={sortDirection}
+          itemsPerPage={itemsPerPage}
         />
       </Suspense>
-      <div className="mt-5 flex w-full justify-center">
+      <div className="mt-5 flex w-full justify-center gap-3">
         <Suspense fallback={<PaginationSkeleton />}>
-          <PaginationWrapper query={query} />
+          <PaginationWrapper query={query} itemsPerPageParam={itemsPerPage} />
         </Suspense>
       </div>
     </div>

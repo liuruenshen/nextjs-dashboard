@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className="antialiased">
         {/* eslint-disable-next-line */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,100,1,200&icon_names=arrow_drop_down,arrow_drop_up"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,100,1,200&icon_names=arrow_drop_down,arrow_drop_up,density_small"
           rel="stylesheet"
         />
         {children}

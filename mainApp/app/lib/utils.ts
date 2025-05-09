@@ -1,3 +1,4 @@
+import { string } from 'pg-format';
 import { Revenue } from './definitions';
 
 export const formatCurrency = (amount: number) => {
@@ -67,3 +68,23 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+
+export function getSafeNumber(value: unknown, defaultValue: number): number {
+  if (typeof value === 'string') {
+    if (isNaN(Number(value))) {
+      return defaultValue;
+    }
+
+    return Number(value);
+  }
+
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  return defaultValue;
+}
+
+export function clamp(min: number, value: number, max: number) {
+  return Math.max(min, Math.min(value, max));
+}
